@@ -2,58 +2,96 @@ const express = require('express');
 const app = express();
 const PORT = 3000;
 
-// Importación de las funciones lógicas
+const estudiantes = require('./datos');
 const {
+  listarEstudiantes,
   buscarPorId,
-  filtrarPorCarrera,
-  filtrarPorSemestre,
-  clasificarEstado,
-  calcularPromedios
+  buscarPorCarrera,
+  obtenerAprobados,
+  obtenerReprobados,
+  calcularPromedioGeneral,
+  obtenerMejorEstudiante,
+  obtenerPeorEstudiante,
+  contarPorCarrera,
+  buscarPorSemestre,
+  buscarMayoresDeEdad,
+  generarReporte,
+  generarRanking
 } = require('./logica');
 
 app.use(express.json());
 
-// Ruta 1: Buscar por ID -> http://localhost:3000/estudiantes/1
+// Ejecución inicial del reporte en consola al arrancar
+generarReporte(estudiantes);
+
+// 1. GET /estudiantes
+app.get('/estudiantes', (req, res) => {
+  res.json(listarEstudiantes(estudiantes));
+});
+
+// 2. GET /estudiantes/:id
 app.get('/estudiantes/:id', (req, res) => {
-  const estudiante = buscarPorId(req.params.id);
-  estudiante 
-    ? res.json({ exito: true, data: estudiante })
-    : res.status(404).json({ exito: false, mensaje: "Estudiante no encontrado" });
+  const resultado = buscarPorId(estudiantes, req.params.id);
+  typeof resultado === 'string'
+    ? res.status(404).json({ error: resultado })
+    : res.json(resultado);
 });
 
-// Ruta 2: Filtrar por Carrera -> http://localhost:3000/carrera/Ingeniería de Sistemas
-app.get('/carrera/:nombreCarrera', (req, res) => {
-  const resultado = filtrarPorCarrera(req.params.nombreCarrera);
-  res.json({ total: resultado.length, data: resultado });
+// 3. GET /carrera/:nombre
+app.get('/carrera/:nombre', (req, res) => {
+  res.json(buscarPorCarrera(estudiantes, req.params.nombre));
 });
 
-// Ruta 3: Filtrar por Semestre -> http://localhost:3000/semestre/5
-app.get('/semestre/:numeroSemestre', (req, res) => {
-  const resultado = filtrarPorSemestre(req.params.numeroSemestre);
-  res.json({ total: resultado.length, data: resultado });
+// 4. GET /aprobados
+app.get('/aprobados', (req, res) => {
+  res.json(obtenerAprobados(estudiantes));
 });
 
-// Ruta 4: Reporte de Aprobados y Reprobados -> http://localhost:3000/reporte/estado
-app.get('/reporte/estado', (req, res) => {
-  const reporte = clasificarEstado();
-  res.json(reporte);
+// 5. GET /reprobados
+app.get('/reprobados', (req, res) => {
+  res.json(obtenerReprobados(estudiantes));
 });
 
-// Ruta 5: Métricas y Promedio General -> http://localhost:3000/reporte/promedios
-app.get('/reporte/promedios', (req, res) => {
-  const promedios = calcularPromedios();
-  res.json(promedios);
+// 6. GET /promedio-general
+app.get('/promedio-general', (req, res) => {
+  res.json({ promedioGeneral: calcularPromedioGeneral(estudiantes) });
 });
 
-// Servidor en escucha
+// 7. GET /mejor-estudiante
+app.get('/mejor-estudiante', (req, res) => {
+  res.json(obtenerMejorEstudiante(estudiantes));
+});
+
+// 8. GET /peor-estudiante
+app.get('/peor-estudiante', (req, res) => {
+  res.json(obtenerPeorEstudiante(estudiantes));
+});
+
+// 9. GET /contar-carreras
+app.get('/contar-carreras', (req, res) => {
+  res.json(contarPorCarrera(estudiantes));
+});
+
+// 10. GET /semestre/:numero
+app.get('/semestre/:numero', (req, res) => {
+  res.json(buscarPorSemestre(estudiantes, req.params.numero));
+});
+
+// 11. GET /mayores/:edad
+app.get('/mayores/:edad', (req, res) => {
+  res.json(buscarMayoresDeEdad(estudiantes, req.params.edad));
+});
+
+// 12. GET /reporte
+app.get('/reporte', (req, res) => {
+  res.json(generarReporte(estudiantes));
+});
+
+// RETO: GET /ranking
+app.get('/ranking', (req, res) => {
+  res.json(generarRanking(estudiantes));
+});
+
 app.listen(PORT, () => {
-  console.log(`====================================================`);
-  console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
-  console.log(`Rutas disponibles:`);
-  console.log(` - GET /estudiantes/:id`);
-  console.log(` - GET /carrera/:nombreCarrera`);
-  console.log(` - GET /semestre/:numeroSemestre`);
-  console.log(` - GET /reporte/estado`);
-  console.log(` - GET /reporte/promedios`);
-  console.log(`====================================================`);
+  console.log(`Servidor activo en http://localhost:${PORT}`);
 });
