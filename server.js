@@ -87,11 +87,17 @@ app.get('/reporte', (req, res) => {
   res.json(generarReporte(estudiantes));
 });
 
-// RETO: GET /ranking
-app.get('/ranking', (req, res) => {
-  res.json(generarRanking(estudiantes));
-});
 
+app.get('/ranking', (req, res) => {
+  const rankingArray = generarRanking(estudiantes);
+  
+  // Unimos el arreglo con saltos de línea
+  const listaTexto = "===== RANKING =====\n\n" + rankingArray.join('\n');
+  
+  // Enviamos como texto plano para que el navegador respete los saltos de línea
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.send(listaTexto);
+});
 app.listen(PORT, () => {
   console.log(`Servidor activo en http://localhost:${PORT}`);
 });

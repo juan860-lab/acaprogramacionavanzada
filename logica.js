@@ -1,3 +1,5 @@
+const estudiantes = require('./datos');
+
 // 1. Listar todos los estudiantes
 function listarEstudiantes(lista) {
   let resultado = [];
@@ -149,15 +151,13 @@ function generarReporte(lista) {
   };
 }
 
-// RETO ADICIONAL: Ordenar de mayor a menor promedio (Bubble Sort nativo)
+// RETO ADICIONAL: Generar Ranking formateado (Posición. Nombre - Promedio)
 function generarRanking(lista) {
-  // Crear copia para no modificar el array original
   let copia = [];
   for (let i = 0; i < lista.length; i++) {
     copia[copia.length] = lista[i];
   }
 
-  // Ordenamiento burbuja de mayor a menor
   for (let i = 0; i < copia.length - 1; i++) {
     for (let j = 0; j < copia.length - 1 - i; j++) {
       if (copia[j].promedio < copia[j + 1].promedio) {
@@ -167,7 +167,13 @@ function generarRanking(lista) {
       }
     }
   }
-  return copia;
+
+  let rankingFormateado = [];
+  for (let i = 0; i < copia.length; i++) {
+    rankingFormateado[rankingFormateado.length] = `${i + 1}. ${copia[i].nombre} - ${copia[i].promedio}`;
+  }
+
+  return rankingFormateado;
 }
 
 module.exports = {
